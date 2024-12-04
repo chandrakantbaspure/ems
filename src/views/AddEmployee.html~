@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Employee</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Add Employee</h1>
+    <form id="employeeForm">
+        <div class="form-row">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required class="form-control">
+        </div>
+        <div class="form-row">
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required class="form-control">
+        </div>
+        <div class="form-row">
+            <label for="salary">Salary:</label>
+            <input type="number" id="salary" name="salary" required class="form-control">
+        </div>
+        <div class="form-row">
+            <label for="joiningDate">Joining Date:</label>
+            <input type="date" id="joiningDate" name="joiningDate" required class="form-control">
+        </div>
+        <div class="form-row">
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" required class="form-control">
+        </div>
+        <div class="form-row">
+            <label for="department">Department:</label>
+            <input type="text" id="department" name="department" required class="form-control">
+        </div>
+        <div class="form-row">
+            <label for="designation">Designation:</label>
+            <input type="text" id="designation" name="designation" required class="form-control">
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary" onclick="addEmployee(event)">Add</button>
+        </div>
+    </form>
+    <div id="message" style="display:none; margin-top: 20px;"></div>
+    <div class="form-row">
+        <a href="index.html">Back to Home</a>
+    </div>
+</div>
+
+<script>
+    function addEmployee(event) {
+        const API_BASE_URL = 'http://localhost:8082/api/employees';
+        console.log("Adding employee:", API_BASE_URL);
+        event.preventDefault();
+
+        const form = document.getElementById('employeeForm');
+        if (form.checkValidity()) {
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const salary = document.getElementById('salary').value;
+            const joiningDate = document.getElementById('joiningDate').value;
+            const address = document.getElementById('address').value;
+            const department = document.getElementById('department').value;
+            const designation = document.getElementById('designation').value;
+
+            console.log("Employee details:", {
+                name,
+                age,
+                salary,
+                joiningDate,
+                address,
+                department,
+                designation
+            });
+
+            fetch(`${API_BASE_URL}/addEmployee`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name,
+                    age: parseInt(age),
+                    salary: parseFloat(salary),
+                    joiningDate,
+                    address,
+                    department,
+                    designation
+                })
+            })
+                .then(response => {
+                    console.log("Response status:", response.status);
+                    console.log("Response headers:", Object.fromEntries(response.headers));
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Server response:", data);
+                    if (data.success) {
+                        document.getElementById('message').textContent = 'Employee added successfully.';
+                        document.getElementById('message').style.color = 'green';
+                    } else {
+                        document.getElementById('message').textContent = `Error: ${data.error || 'Could not add employee.'}`;
+                        document.getElementById('message').style.color = 'red';
+                    }
+                    document.getElementById('message').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                    document.getElementById('message').textContent = 'An unexpected error occurred. Please try again later.';
+                    document.getElementById('message').style.color = 'red';
+                    document.getElementById('message').style.display = 'block';
+                });
+        } else {
+            form.reportValidity();
+        }
+    }
+
+
+    document.getElementById('employeeForm').addEventListener('submit', addEmployee);
+
+    // Add event listener to the button
+    document.querySelector('.btn-primary').addEventListener('click', addEmployee);
+</script>
+</body>
+</html>

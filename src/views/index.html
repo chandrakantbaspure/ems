@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management System</title>
+    <link href="styles.css" rel="stylesheet">
+
+    <script src="scripts.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>Employee Management System</h1>
+
+    <table id="employeeTable">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Department</th>
+            <th>Designation</th>
+            <th>Salary</th>
+            <th>Joining Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="employeeData">
+        </tbody>
+    </table>
+
+    <div class="form-row">
+        <div class="col-auto">
+            <label for="employeeId">Fetch by ID:</label>
+            <input type="number" class="form-control" id="employeeId" placeholder="Enter Employee ID">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary"
+                    onclick="fetchEmployeeById(document.getElementById('employeeId').value)">
+                Fetch
+            </button>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-auto">
+            <label for="minAge">Fetch by Age Range:</label>
+            <input type="number" class="form-control" id="minAge" placeholder="Min Age">
+        </div>
+        <div class="col-auto">
+            <input type="number" class="form-control" id="maxAge" placeholder="Max Age">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary"
+                    onclick="fetchEmployeesByAgeRange(document.getElementById('minAge').value, document.getElementById('maxAge').value)">
+                Fetch
+            </button>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-auto">
+            <label for="department">Fetch by Department:</label>
+            <input type="text" class="form-control" id="department" placeholder="Department Name">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary"
+                    onclick="fetchEmployeesByDepartment(document.getElementById('department').value)">Fetch
+            </button>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-auto">
+            <label for="startDate">Fetch by Joining Date Range:</label>
+            <input type="date" class="form-control" id="startDate">
+        </div>
+        <div class="col-auto">
+            <input type="date" class="form-control" id="endDate">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary"
+                    onclick="fetchEmployeesByJoiningDateRange(document.getElementById('startDate').value, document.getElementById('endDate').value)">
+                Fetch
+            </button>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-auto">
+            <label for="deleteId">Delete Employee:</label>
+            <input type="number" class="form-control" id="deleteId" placeholder="Employee ID">
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-danger" onclick="deleteEmployeeById(document.getElementById('deleteId').value)">
+                Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-auto">
+            <button class="btn btn-warning" onclick="clearInputs()">Clear Inputs</button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" onclick="fetchAllEmployees()">Show All Employees</button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-secondary" onclick="clearTable()">Clear Table</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

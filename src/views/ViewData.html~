@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management System</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin-top: 20px;
+        }
+
+        .mb-3 {
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Employee Management System</h1>
+
+    <table class="table table-striped table-bordered" id="employeeTable">
+        <thead class="thead-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Department</th>
+            <th>Designation</th>
+            <th>Salary</th>
+            <th>Joining Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="employeeData">
+        <!-- Employee data will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <div class="mb-3">
+        <label for="employeeId">Fetch by ID:</label>
+        <input type="number" class="form-control" id="employeeId" placeholder="Enter Employee ID">
+        <button class="btn btn-primary mt-2" onclick="fetchEmployeeById(document.getElementById('employeeId').value)">
+            Fetch
+        </button>
+    </div>
+
+    <div class="mb-3">
+        <label for="minAge">Fetch by Age Range:</label>
+        <input type="number" class="form-control" id="minAge" placeholder="Min Age"
+               style="display:inline; width: calc(50% - 5px);">
+        <input type="number" class="form-control" id="maxAge" placeholder="Max Age"
+               style="display:inline; width: calc(50% - 5px);">
+        <button class="btn btn-primary mt-2"
+                onclick="fetchEmployeesByAgeRange(document.getElementById('minAge').value, document.getElementById('maxAge').value)">
+            Fetch
+        </button>
+    </div>
+
+    <div class="mb-3">
+        <label for="department">Fetch by Department:</label>
+        <input type="text" class="form-control" id="department" placeholder="Department Name">
+        <button class="btn btn-primary mt-2"
+                onclick="fetchEmployeesByDepartment(document.getElementById('department').value)">Fetch
+        </button>
+    </div>
+
+    <div class="mb-3">
+        <label for="startDate">Fetch by Joining Date Range:</label>
+        <input type="date" class="form-control" id="startDate" style="display:inline; width: calc(50% - 5px);">
+        <input type="date" class="form-control" id="endDate" style="display:inline; width: calc(50% - 5px);">
+        <button class="btn btn-primary mt-2"
+                onclick="fetchEmployeesByJoiningDateRange(document.getElementById('startDate').value, document.getElementById('endDate').value)">
+            Fetch
+        </button>
+    </div>
+
+    <div class="mb-3">
+        <label for="deleteId">Delete Employee:</label>
+        <input type="number" class="form-control" id="deleteId" placeholder="Employee ID">
+        <button class="btn btn-danger mt-2" onclick="deleteEmployeeById(document.getElementById('deleteId').value)">
+            Delete
+        </button>
+    </div>
+
+    <div class="mb-3">
+        <button class="btn btn-warning" onclick="clearInputs()">Clear Inputs</button>
+        <button class="btn btn-secondary" onclick="clearTable()">Clear Table</button>
+    </div>
+
+    <div class="mb-3">
+        <input type="number" class="form-control" id="updateId" placeholder="Employee ID to Update">
+        <button class="btn btn-info mt-2" onclick="updateEmployeeById(document.getElementById('updateId').value)">
+            Update
+        </button>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8082/api/employees';
+
+        function fetchData(url, onSuccess, onError) {
+            fetch(url)
+                .then(response => response.json())
+                .then(onSuccess)
+                .catch(onError);
+        }
+
+        function fetchAllEmployees() {
+            fetchData(
+                API_BASE_URL,
+                data => showData(data),
+                error => console.error('Error fetching all employees:', error)
+            );
+        }
+
+        function fetchEmployeeById(id) {
+            fetchData(
+                `${API_BASE_URL}/fetchEmployee/${id}`,
+                data => showData([data]),
+                error => console.error(`Error fetching employee with ID ${id}:`, error)
+            );
+        }
+
+        function fetchEmployeesByAgeRange(minAge, maxAge) {
+            fetchData(
+                `${API_BASE_URL}/findbetweenage/${minAge}/${maxAge}`,
+                data => showData(data),
+                error => console.error(`Error fetching employees between ages ${minAge} and ${maxAge}:`, error)
+            );
+        }
+
+        function fetchEmployeesByDepartment(department) {
+            fetchData(
+                `${API_BASE_URL}/department/${department}`,
+                data => showData(data),
+                error => console.error(`Error fetching employees in Department ${department}:`, error)
+            );
+        }
+
+        function fetchEmployeesByJoiningDateRange(startDate, endDate) {
+            fetchData(
+                `${API_BASE_URL}/filter/${startDate}/${endDate}`,
+                data => showData(data),
+                error => console.error(`Error fetching employees joined between ${startDate} and ${endDate}:`, error)
+            );
+        }
+
+        function deleteEmployeeById(id) {
+            fetch(`${API_BASE_URL}/deleteEmployee/${id}`, {method: 'DELETE'})
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`Employee with ID ${id} successfully deleted.`);
+                        fetchAllEmployees(); // Refresh the data
+                    } else {
+                        console.error(`Error deleting employee with ID ${id}:`, response.statusText);
+                    }
+                })
+                .catch(error => console.error(`Error deleting employee with ID ${id}:`, error));
+        }
+
+        function updateEmployeeById(id) {
+            const updatedEmployee = {
+                name: prompt('Enter new name:'),
+                age: parseInt(prompt('Enter new age:')),
+                department: prompt('Enter new department:'),
+                designation: prompt('Enter new designation:'),
+                salary: parseFloat(prompt('Enter new salary:')),
+                joiningDate: prompt('Enter new joining date (YYYY-MM-DD):')
+            };
+            fetch(`${API_BASE_URL}/updateEmployee/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(updatedEmployee)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`Employee with ID ${id} successfully updated.`);
+                        fetchAllEmployees(); // Refresh the data
+                    } else {
+                        console.error(`Error updating employee with ID ${id}:`, response.statusText);
+                    }
+                })
+                .catch(error => console.error(`Error updating employee with ID ${id}:`, error));
+        }
+
+        function showData(data) {
+            const tableBody = document.getElementById('employeeData');
+            tableBody.innerHTML = '';
+            data.forEach(employee => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${employee.employeeId}</td>
+                    <td>${employee.name}</td>
+                    <td>${employee.age}</td>
+                    <td>${employee.department}</td>
+                    <td>${employee.designation}</td>
+                    <td>$${employee.salary}</td>
+                    <td>${employee.joiningDate}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="fetchEmployeeById(${employee.employeeId})">View</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteEmployeeById(${employee.employeeId})">Delete</button>
+                        <button class="btn btn-warning btn-sm" onclick="updateEmployeeById(${employee.employeeId})">Update</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function clearInputs() {
+            document.querySelectorAll('input').forEach(input => input.value = '');
+        }
+
+        function clearTable() {
+            const tableBody = document.getElementById('employeeData');
+            tableBody.innerHTML = '';
+        }
+       
+
+    </script>
+</div>
+</body>
+</html>
