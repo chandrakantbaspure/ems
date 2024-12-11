@@ -24,8 +24,35 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleErrorResponse(UserNotFoundException ex) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date().toString());
+        errorResponse.setMessage(ex.getMessage());
+        errorResponse.setStatus(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserInvalidException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidUSerErrorResponse(UserInvalidException ex) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date().toString());
+        errorResponse.setMessage(ex.getMessage());
+        errorResponse.setStatus(HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(EmployeeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleMismatchErrorResponse(EmployeeMismatchException ex) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date().toString());
+        errorResponse.setMessage(ex.getMessage());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UserAlreadyExist.class)
+    public ResponseEntity<ErrorResponse> handleUserExistErrorResponse(UserAlreadyExist ex) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setTimestamp(new Date().toString());
         errorResponse.setMessage(ex.getMessage());

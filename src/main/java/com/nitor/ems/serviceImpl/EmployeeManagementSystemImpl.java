@@ -4,25 +4,21 @@ import com.nitor.ems.exception.EmployeeNotFoundException;
 import com.nitor.ems.model.Employee;
 import com.nitor.ems.repository.EmployeeRepository;
 import com.nitor.ems.service.EmployeeService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+@Transactional
 @Service
 public class EmployeeManagementSystemImpl implements EmployeeService {
-    private static final String EMPLOYEE_FILTER_LOG = "Searching employee by joining date: {}";
-    private static final String EMPLOYEE_TENURE_LOG = "Calculating employee tenure: {}";
     private final Logger log = LoggerFactory.getLogger(EmployeeManagementSystemImpl.class);
     private static final String EMPLOYEE_NOT_FOUND = "Employee not found: {}";
-    private static final String EMPLOYEE_FOUND = "Employee found: {}";
-    private static final String EMPLOYEE_UPDATED = "Employee updated: {}";
-    private static final String EMPLOYEE_ADD_INFO = "Adding new employee";
-    private static final String NEW_EMPLOYEE_LOG = "New employee added: {}";
     private static final String EMPLOYEE_UPDATE_LOG = "Updating employee: {}";
     private static final String ALL_EMPLOYEES_LOG = "Getting all employees";
     private static final String EMPLOYEE_DELETE_LOG = "Deleting employee: {}";
@@ -39,9 +35,15 @@ public class EmployeeManagementSystemImpl implements EmployeeService {
 
     @Override
     public Employee addNewEmployee(Employee employee) {
-        log.info(EMPLOYEE_ADD_INFO);
+
+        if (employee.getEmployeeId() != null && employeeRepository.existsById(employee.getEmployeeId())) {
+            throw new IllegalStateException("Employee with ID " + employee.getEmployeeId() + " already exists");
+        }
+        Random random = new Random();
+        employee.setEmployeeId(random.nextLong(10000));
         return employeeRepository.save(employee);
     }
+
 
     @Override
     public Employee updateEmployee(Employee employee, Long empId) {
@@ -61,7 +63,11 @@ public class EmployeeManagementSystemImpl implements EmployeeService {
     @Override
     public Employee findEmployeeById(Long id) {
         log.info(EMPLOYEE_SEARCH_LOG, id);
-        return employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException("Employee not found"));
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if (employee.isEmpty()) {
+            throw new EmployeeNotFoundException("Employee not found");
+        }
+        return employee.get();
     }
 
     @Override
@@ -101,6 +107,7 @@ public class EmployeeManagementSystemImpl implements EmployeeService {
 
     @Override
     public List<Employee> findEmployeesByDepartment(String department) {
+        log.info("Searching employees by department: {}", department);
         return employeeRepository.findByDepartment(department);
     }
 
@@ -109,9 +116,15 @@ public class EmployeeManagementSystemImpl implements EmployeeService {
         return employeeRepository.sortEmployeeByJoiningDate();
     }
 
+    @Override
+    public List<Employee> sortEmployeesByParameters(String field, String order) {
+        Sort.Direction direction = Sort.Direction.fromString(order);
+        return employeeRepository.findAll(Sort.by(direction, field));
+    }
 
     @Override
     public List<Employee> findByAgeBetween(Integer startingAge, Integer endingAge) {
+        log.info("Finding employees with age between {} and {}", startingAge, endingAge);
         return employeeRepository.findByAgeBetween(startingAge, endingAge);
     }
 }

@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS employee;
 CREATE TABLE IF NOT EXISTS employee (
     employee_id BIGINT PRIMARY KEY,
     name VARCHAR(255),

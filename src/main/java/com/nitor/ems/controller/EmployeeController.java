@@ -55,10 +55,13 @@ public class EmployeeController {
     public ResponseEntity<Employee> updateEmployee(@PathVariable Long empId, @Valid @RequestBody Employee updatedEmployee) {
         log.info("Request to update employee with id: " + empId);
         Employee employee = employeeService.findEmployeeById(empId);
-        if (!updatedEmployee.getEmployeeId().equals(empId)) {
-            throw new EmployeeMismatchException("Employee with id " + employee.getEmployeeId() + " not matching id " + empId);
-        } else if (employeeService.findEmployeeById(empId) == null || !employeeService.findEmployeeById(empId).equals(empId)) {
-            throw new EmployeeNotFoundException("Employee is not found: " + empId);
+        if (employee == null) {
+            log.info("Employee not found: " + empId);
+            throw new EmployeeNotFoundException("Employee not found with id: " + empId);
+        }
+        if (!employee.getEmployeeId().equals(updatedEmployee.getEmployeeId())) {
+            log.info("Employee ID mismatch: " + empId);
+            throw new EmployeeMismatchException("Employee ID mismatch");
         }
         return ResponseEntity.ok(employeeService.updateEmployee(updatedEmployee, empId));
     }
@@ -75,7 +78,7 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/beforejoiningDate/{joinDate}")
+    @GetMapping("/beforejoiningdate/{joinDate}")
     public ResponseEntity<List<Employee>> findEmployeesBeforeJoiningDate(@PathVariable LocalDate joinDate) {
         log.info("Request to find employees before joining date: " + joinDate);
         List<Employee> employees = employeeService.findEmployeesBeforeJoiningDate(joinDate);
@@ -117,6 +120,25 @@ public class EmployeeController {
             throw new EmployeeNotFoundException("No employees found");
         }
         return ResponseEntity.ok(employees);
+    }
+
+    @GetMapping("/sortbyparameters")
+    public ResponseEntity<List<Employee>> sortemployees(@RequestParam String field, @RequestParam String order) {
+        log.info("Request to get sorted employees: " + field + " " + order);
+
+        try {
+            List<Employee> sortedEmployees = employeeService.sortEmployeesByParameters(field, order);
+
+            if (sortedEmployees.isEmpty()) {
+                log.warn("No employees found matching the sort criteria");
+                return ResponseEntity.noContent().build();
+            }
+
+            return ResponseEntity.ok(sortedEmployees);
+        } catch (IllegalArgumentException e) {
+            log.error("Error processing request: " + e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @GetMapping("findbetweenage/{startingAge}/{endingAge}")

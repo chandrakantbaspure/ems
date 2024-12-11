@@ -24,6 +24,6 @@ public interface EmployeeService {
 
     List<Employee> sortEmployeeByJoiningDate();
 
-
+    public List<Employee> sortEmployeesByParameters(String sortBy, String order);
     List<Employee> findByAgeBetween(Integer startingAge, Integer endingAge);
 }

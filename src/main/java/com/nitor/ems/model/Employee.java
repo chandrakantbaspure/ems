@@ -18,7 +18,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Employee extends Person {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long employeeId;
     @NotBlank(message = "Department cannot be empty")
     private String department;
